@@ -19,6 +19,7 @@ from distutils.extension import Extension
 from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 import glob
+import numpy as np
 sources = glob.glob('fastchem_src/*.cpp')
 
 clib = Extension("taurex_fastchem.external.fastchem",  # indicate where it should be available !
