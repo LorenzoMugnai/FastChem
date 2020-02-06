@@ -1,0 +1,5 @@
+*.pyd
+build
+taurex_fastchem/external/fastchem.cpp
+*.pyc
+.vscode/settings.json
