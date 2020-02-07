@@ -1,9 +1,9 @@
 
 import setuptools
 from setuptools import find_packages
-from distutils.core import setup
-from distutils.core import Extension
-from distutils import log
+from numpy.distutils.core import setup
+from numpy.distutils.core import Extension
+from numpy.distutils import log
 import re, os
 
 packages = find_packages(exclude=('tests', 'doc'))
@@ -33,7 +33,8 @@ clib = Extension("taurex_fastchem.external.fastchem",  # indicate where it shoul
 
 input_data = glob.glob('input/*.dat')
 
-data_files = ('taurex_fastchem/external',[*input_data,'fastchem_src/chem_input/chemical_elements.dat'])
+data_files = ( 'taurex_fastchem/external/data' , [*input_data, os.path.join('fastchem_src','chem_input','chemical_elements.dat') ] )
+
 ext = cythonize([clib],language_level="3")
 setup(name='taurex_fastchem',
       author="Ahmed Faris Al-Refaie",
