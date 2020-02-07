@@ -8,10 +8,12 @@ cdef extern from "fastchem.h" namespace "fastchem":
         FastChem(const FastChem &obj) except +
         unsigned int getSpeciesNumber()
         unsigned int getElementNumber()
-        unsigned int calcDensities(const double temperature, const double pressure,
-                                   vector[double] & density_n_out, double& h_density_out, double& mean_molecular_weight_out)
+        unsigned int calcDensities(const double temperature,const double pressure,
+                                vector[double] & density_out,
+                                double & h_density_out, double& mean_molecular_weight_out);
         string getSpeciesName(const unsigned int species_index)
         string getSpeciesSymbol(const unsigned int species_index)
+        string getElementSymbol(const unsigned int species_index)
 
 cdef class PyDoubleFastChem(object):
     
@@ -25,10 +27,18 @@ cdef class PyDoubleFastChem(object):
         #self.fchem = fchem
     
     def calcDensities(self, T, P):
-        cdef vector[double] density_out
-        cdef double h_density_out
-        cdef double mean_mol_out
-        cdef unsigned int result = self.fchem.calcDensities(T,P,density_out, h_density_out, mean_mol_out)
+
+        cdef int nb_grid_points = len(T)
+        cdef vector[vector[double]] density_out
+        density_out.resize(nb_grid_points)
+        cdef vector[double] h_density_out
+        h_density_out.resize(nb_grid_points)
+        cdef vector[double] mean_mol_out
+        mean_mol_out.resize(nb_grid_points)
+        cdef unsigned int result = 0
+        for idx,val in enumerate(zip(T,P)):
+            temp,press = val
+            result = self.fchem.calcDensities(temp,press,density_out[idx], h_density_out[idx], mean_mol_out[idx])
 
         return result ,density_out, h_density_out,mean_mol_out
 
@@ -48,11 +58,22 @@ cdef class PyDoubleFastChem(object):
         cdef string result = self.fchem.getSpeciesSymbol(index)
         return result.c_str().decode('utf-8')
 
+    def elementSymbol(self, index):
+        cdef string result = self.fchem.getElementSymbol(index)
+        return result.c_str().decode('utf-8')
+
+
     def speciesIter(self):
         itera = range(self.numSpecies)
 
         for i in itera:
             yield self.speciesSymbol(i)
+
+    def elementIter(self):
+        itera = range(self.numElements)
+
+        for i in itera:
+            yield self.elementSymbol(i)
 
     def __dealloc__(self):
             del self.fchem
