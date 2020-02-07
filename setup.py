@@ -27,9 +27,13 @@ clib = Extension("taurex_fastchem.external.fastchem",  # indicate where it shoul
                                *sources,
                                ],
                       include_dirs=['fastchem_src/'],
-                      extra_compile_args=["-O3", "--std=c++11", "-ffast-math", "-Wall"],
+                      extra_compile_args=["-O3", "--std=c++11", "-ffast-math", "-Wall","-pedantic","--fast-math" ,"-march=native"],
                       language="c++"
                       )
+
+input_data = glob.glob('input/*.dat')
+
+data_files = ('taurex_fastchem/external',[*input_data,'fastchem_src/chem_input/chemical_elements.dat'])
 ext = cythonize([clib],language_level="3")
 setup(name='taurex_fastchem',
       author="Ahmed Faris Al-Refaie",
@@ -41,5 +45,6 @@ setup(name='taurex_fastchem',
       entry_points=entry_points,
       provides=provides,
       requires=requires,
+      data_files=[data_files],
  #     cmdclass = {"build_ext": build_ext},
       install_requires=install_requires)
