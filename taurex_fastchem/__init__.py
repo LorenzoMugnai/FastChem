@@ -1,0 +1,1 @@
+from .chemistry.fastchem import FastChem
