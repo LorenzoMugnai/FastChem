@@ -5,6 +5,7 @@ import os
 import shutil
 import numpy as np
 from taurex.util.util import mass
+from taurex.core import fitparam
 
 
 
@@ -81,6 +82,7 @@ class FastChem(Chemistry):
         self.generate_abundances(elements=elements, ratios_to_O=ratios_to_O)
         self.determine_molecules()
         self._gases = None
+        self.add_ratio_params()
     
 
     def generate_abundances(self,elements=None,ratios_to_O=None):
@@ -166,6 +168,40 @@ class FastChem(Chemistry):
         self._gases = np.array(density_out).T/density
 
         self.compute_mu_profile(nlayers)
+
+        os.unlink(param_file)
+        os.unlink(element_file)
+
+    @fitparam(param_name='metallicity',param_latex='Z',default_bounds=[0.2,2.0],default_fit=False)
+    def metallicity(self):
+        return self._metallicity
+    
+    @metallicity.setter
+    def metallicity(self,value):
+        self._metallicity = value
+
+    def add_ratio_params(self):
+
+        for idx,element in enumerate(self._metal_elements):
+            param_name = f'{element}_O_ratio'
+            param_tex = f'{element}/O'
+
+            def read_mol(self, idx=idx):
+                return self._ratios[idx]
+
+            def write_mol(self, value, idx=idx):
+                self._ratios[idx] = value
+
+            fget = read_mol
+            fset = write_mol
+
+            bounds = [1.0e-12, 0.1]
+
+            default_fit = False
+            self.add_fittable_param(param_name, param_tex, fget,
+                                    fset, 'log', default_fit, bounds)
+
+
 
 
     @property
