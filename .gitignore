@@ -3,3 +3,11 @@ build
 taurex_fastchem/external/fastchem.cpp
 *.pyc
 .vscode/settings.json
+
+output/
+
+*.o
+*.d
+*.so
+
+taurex_fastchem/external/data/*

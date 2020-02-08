@@ -5,6 +5,10 @@ import os
 import shutil
 import numpy as np
 from taurex.util.util import mass
+
+
+
+
 class FastChem(Chemistry):
 
     parameter_template = """#element abundance file   
@@ -49,7 +53,7 @@ class FastChem(Chemistry):
                           4.95, 3.93, 4.56, 13.1139]
     default_mass = [mass[el] for el in default_elements[:-1]]
 
-    def __init__(self,H_He_ratio=0.083,elements=None,ratios_to_O=None, metallicity=0, base_profile='solar',
+    def __init__(self,H_He_ratio=0.083,elements=None,ratios_to_O=None, metallicity=1.0, base_profile='solar',
                  elements_datafile=None, species_datafile=None, chem_accuracy=1.0e-4, with_ions=False,
                  pressure_accuracy=1e-4, newton_error=1e-4, max_chem_iter=300,
                  max_press_iter=100, max_nedler_iter=20000):
@@ -75,7 +79,8 @@ class FastChem(Chemistry):
 
         self._electron = self.default_abundances[-1]
         self.generate_abundances(elements=elements, ratios_to_O=ratios_to_O)
-
+        self.determine_molecules()
+        self._gases = None
     
 
     def generate_abundances(self,elements=None,ratios_to_O=None):
@@ -92,7 +97,7 @@ class FastChem(Chemistry):
 
         nonmetal[1] = 12 + np.log10(self._h_he_ratio)
 
-        print(ratios)
+        #print(ratios)
 
         metals = O_abund + ratios
 
@@ -105,12 +110,89 @@ class FastChem(Chemistry):
         param_file, element_file = self.generate_parameter_file()
 
         fchem = fastchem.PyDoubleFastChem(param_file,0)
-        species = list(fchem.speciesIter())
+        species = [s.replace('1','') for s in fchem.speciesIter()]
 
         available = self.availableActive
+        self._active_index = np.array([idx for idx,s in enumerate(species) if s in available])
+        self._inactive_index = np.array([idx for idx,s in enumerate(species) if s not in available])
 
         self._active_gases = [s for s in species if s in available]
         self._inactive_gases = [s for s in species if s not in available]
+        os.unlink(param_file)
+        os.unlink(element_file)
+
+    @property
+    def activeGases(self):
+        return self._active_gases
+
+    @property
+    def inactiveGases(self):
+        return self._inactive_gases
+
+    def initialize_chemistry(self, nlayers=100, temperature_profile=None,
+                             pressure_profile=None, altitude_profile=None):
+        """
+        **Requires implementation**
+
+        Derived classes should implement this to compute the active and
+        inactive gas profiles
+
+        Parameters
+        ----------
+        nlayers: int
+            Number of layers in atmosphere
+
+        temperature_profile: :obj:`array`
+            Temperature profile in K, must have length ``nlayers``
+
+        pressure_profile: :obj:`array`
+            Pressure profile in Pa, must have length ``nlayers``
+
+        altitude_profile: :obj:`array`
+            Altitude profile in m, must have length ``nlayers``
+
+        """
+
+        CONST_K = 1.3806504e-16
+
+        density = pressure_profile*10/(CONST_K*temperature_profile)
+
+        param_file, element_file = self.generate_parameter_file()
+
+        fchem = fastchem.PyDoubleFastChem(param_file,0)
+        result ,density_out, h_density_out,mean_mol_out = \
+            fchem.calcDensities(temperature_profile,pressure_profile*10)
+
+        self._gases = np.array(density_out).T/density
+
+        self.compute_mu_profile(nlayers)
+
+
+    @property
+    def activeGasMixProfile(self):
+        """
+        **Requires implementation**
+
+        Should return profiles of shape ``(nactivegases,nlayers)``. Active
+        refers to gases that are actively absorbing in the atmosphere.
+        Another way to put it these are gases where molecular cross-sections
+        are used.
+
+        """
+
+        return self._gases[self._active_index]
+
+    @property
+    def inactiveGasMixProfile(self):
+        """
+        **Requires implementation**
+
+        Should return profiles of shape ``(ninactivegases,nlayers)``.
+        These general refer to gases: ``H2``, ``He`` and ``N2``
+
+
+        """
+        return self._gases[self._inactive_index]
 
 
     def generate_element_file(self):
@@ -146,3 +228,8 @@ class FastChem(Chemistry):
         param_file.close()
 
         return param_filename, element_filename
+
+
+    @classmethod
+    def input_keywords(cls):
+        return ['fastchem',]
