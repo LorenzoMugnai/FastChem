@@ -253,6 +253,7 @@ class FastChem(Chemistry):
         elem_file.write('#### Cool stuff\n')
 
         for elm,val in self.generate_abundances():
+            self.info('Writing %s %s',elm,val)
             elem_file.write(f'{elm} {val}\n')
         elm_filename  = elem_file.name
         elem_file.close()
