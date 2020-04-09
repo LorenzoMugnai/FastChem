@@ -54,7 +54,7 @@ class FastChem(Chemistry):
                           4.95, 3.93, 4.56, 13.1139]
     default_mass = [mass[el] for el in default_elements[:-1]]
 
-    def __init__(self,H_He_ratio=0.083,elements=None,ratios_to_O=None, metallicity=1.0, base_profile='solar',
+    def __init__(self,H_He_ratio=0.083,selected_elements=None,ratio_elements=None,ratios_to_O=None, metallicity=1.0, base_profile='solar',
                  elements_datafile=None, species_datafile=None, chem_accuracy=1.0e-4, with_ions=False,
                  pressure_accuracy=1e-4, newton_error=1e-4, max_chem_iter=300,
                  max_press_iter=100, max_nedler_iter=20000):
@@ -72,14 +72,28 @@ class FastChem(Chemistry):
         self._with_ions = with_ions
         self._metallicity = metallicity
         self._h_he_ratio = H_He_ratio
-        self._nonmetal = np.array(self.default_abundances[:2])
+
+        self._elements = self.default_elements
+        
+        if selected_elements is not None:
+            self._elements = [elem for elem in self.default_elements if elem in selected_elements]
+
+        
+        self._abundances = np.array([self.default_abundances[self.default_elements.index(elem)] 
+                                       for elem in self._elements])
+        
+        self.info('Elements and thier abundances selected: %s',list(zip(self._elements,self._abundances)))
+
+
+
+        self._nonmetal = np.array(self._abundances[:2])
         self._nonmetal[1] = 12 + np.log10(self._h_he_ratio)
-        self._O_abund = self.default_abundances[2]
-        self._metal_elements = self.default_elements[3:-1]
-        self._ratios = 10**(np.array(self.default_abundances[3:]) - self._O_abund)
+        self._O_abund = self._abundances[2]
+        self._metal_elements = self._elements[3:]
+        self._ratios = 10**(np.array(self._abundances[3:]) - self._O_abund)
 
         self._electron = self.default_abundances[-1]
-        self.generate_abundances(elements=elements, ratios_to_O=ratios_to_O)
+        self.generate_abundances(elements=ratio_elements, ratios_to_O=ratios_to_O)
         self.determine_molecules()
         self._gases = None
         self.add_ratio_params()
@@ -105,8 +119,10 @@ class FastChem(Chemistry):
 
         complete = np.concatenate((nonmetal,[O_abund],metals))
 
+        # print('FASTTTTTTTTTTT')
+        # print(list(zip(self.default_elements[:-1],complete)))
 
-        return zip(self.default_elements[:-1],complete)
+        return zip(self._elements[:-1],complete)
 
     def determine_molecules(self):
         param_file, element_file = self.generate_parameter_file()
