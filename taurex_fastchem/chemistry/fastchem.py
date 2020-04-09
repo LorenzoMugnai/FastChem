@@ -122,7 +122,7 @@ class FastChem(Chemistry):
         # print('FASTTTTTTTTTTT')
         # print(list(zip(self.default_elements[:-1],complete)))
 
-        return zip(self._elements[:-1],complete)
+        return zip(self._elements,complete)
 
     def determine_molecules(self):
         param_file, element_file = self.generate_parameter_file()
