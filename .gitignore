@@ -11,3 +11,5 @@ output/
 *.so
 
 taurex_fastchem/external/data/*
+
+/*.egg-info
