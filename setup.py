@@ -20,7 +20,27 @@ from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 import glob
 import numpy as np
-sources = glob.glob('fastchem_src/*.cpp')
+sources = ['fastchem_src/solver_linsol_quadsol.cpp',
+ 'fastchem_src/solver_nelder_mead_single.cpp',
+ 'fastchem_src/init_solver.cpp',
+ 'fastchem_src/solve_fastchem.cpp',
+ 'fastchem_src/init_read_files.cpp',
+ 'fastchem_src/mass_action_constant.cpp',
+ 'fastchem_src/initial_h_density.cpp',
+ 'fastchem_src/calc_total_h_density.cpp',
+ 'fastchem_src/calc_densities_private.cpp',
+ 'fastchem_src/calc_densities.cpp',
+ 'fastchem_src/fastchem.cpp',
+ 'fastchem_src/calc_mean_mol_weight.cpp',
+ 'fastchem_src/solver_newtsol.cpp',
+ 'taurex_fastchem/glue/init_add_species.cpp',
+ 'fastchem_src/calc_densities_ph.cpp',
+ 'fastchem_src/solver_scaling_factor.cpp',
+ 'fastchem_src/init.cpp',
+ 'fastchem_src/check.cpp',
+ 'fastchem_src/bisection.cpp',
+ 'fastchem_src/get.cpp',
+ 'fastchem_src/solver.cpp']
 
 clib = Extension("taurex_fastchem.external.fastchem",  # indicate where it should be available !
                       sources=["taurex_fastchem/external/fastchem.pyx",
