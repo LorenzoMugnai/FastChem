@@ -8,6 +8,19 @@ from taurex.util.util import mass
 from taurex.core import fitparam
 
 
+def element_count(mol):
+    import re
+    s=re.findall('([A-Z][a-z]?)([0-9]*)', mol)
+    compoundweight = 0
+    elems_dict = {}
+    for element, count in s:
+        if count == '':
+            count = 1
+        if element not in elems_dict:
+            elems_dict[element] = count
+        else:
+            elems_dict[element] += count
+    return elems_dict
 
 
 class FastChem(Chemistry):
@@ -131,11 +144,30 @@ class FastChem(Chemistry):
         species = [s.replace('1','') for s in fchem.speciesIter()]
 
         available = self.availableActive
-        self._active_index = np.array([idx for idx,s in enumerate(species) if s in available])
-        self._inactive_index = np.array([idx for idx,s in enumerate(species) if s not in available])
 
-        self._active_gases = [s for s in species if s in available]
-        self._inactive_gases = [s for s in species if s not in available]
+        _act_id = []
+        _inact_id =[]
+        _act_gas = []
+        _inact_gas = []
+        for idx,s in enumerate(species):
+            found = False
+            elem_check = element_count(s)
+            for av in available:
+                if elem_check == element_count(av):
+                    found = True
+                    _act_gas.append(av)
+                    break
+            
+            if found:
+                _act_id.append(idx)
+            else:
+                _inact_gas.append(s)
+                _inact_id.append(idx)
+        self._active_index = np.array(_act_id)
+        self._inactive_index = np.array(_inact_id)
+
+        self._active_gases = _act_gas
+        self._inactive_gases = _inact_gas
         os.unlink(param_file)
         os.unlink(element_file)
 
@@ -231,8 +263,10 @@ class FastChem(Chemistry):
         are used.
 
         """
-
-        return self._gases[self._active_index]
+        if self._active_index is not None and len(self._active_index) > 0:
+            return self._gases[self._active_index]
+        else:
+            return None
 
     @property
     def inactiveGasMixProfile(self):
@@ -244,7 +278,10 @@ class FastChem(Chemistry):
 
 
         """
-        return self._gases[self._inactive_index]
+        if self._inactive_index is not None and len(self._inactive_index) > 0:
+            return self._gases[self._inactive_index]
+        else:
+            return None
 
 
     def generate_element_file(self):
