@@ -67,7 +67,7 @@ class FastChem(Chemistry):
                           4.95, 3.93, 4.56, 13.1139]
     default_mass = [mass[el] for el in default_elements[:-1]]
 
-    def __init__(self,H_He_ratio=0.083,selected_elements=None,ratio_elements=None,ratios_to_O=None, metallicity=1.0, base_profile='solar',
+    def __init__(self,H_He_ratio=0.083,selected_elements=None, elements_abundance_file=None, ratio_elements=None,ratios_to_O=None, metallicity=1.0, base_profile='solar',
                  elements_datafile=None, species_datafile=None, chem_accuracy=1.0e-4, with_ions=False,
                  pressure_accuracy=1e-4, newton_error=1e-4, max_chem_iter=300,
                  max_press_iter=100, max_nedler_iter=20000):
@@ -88,14 +88,56 @@ class FastChem(Chemistry):
 
         self._elements = self.default_elements
         
-        if selected_elements is not None:
-            self._elements = [elem for elem in self.default_elements if elem in selected_elements]
+        self._abundances = np.array(self.default_abundances[:])
 
-        
-        self._abundances = np.array([self.default_abundances[self.default_elements.index(elem)] 
-                                       for elem in self._elements])
+        if elements_abundance_file is not None:
+            elements = []
+            abundances = []
+            with open(elements_abundance_file,'r') as f:
+                for l in f:
+                    if l.startswith('#'):
+                        continue
+                    elem ,val = l.split()
+                    elem = elem.strip()
+                    val = float(val)
+                    elements.append(elem)
+                    abundances.append(val)          
+
+            H_index = elements.index('H')
+            elements.insert(0,elements.pop(H_index))
+            abundances.insert(0,abundances.pop(H_index))
+
+            He_index = elements.index('He')
+            elements.insert(1,elements.pop(He_index))
+            abundances.insert(1,abundances.pop(He_index))
+
+            O_index = elements.index('O')
+            elements.insert(2,elements.pop(O_index))
+            abundances.insert(2,abundances.pop(O_index))
+            
+            e_index = elements.index('e-')
+            elements.insert(-1,elements.pop(e_index))
+            abundances.append(abundances.pop(e_index))
+
+
+
+
+            
+
+
+            self._elements = elements
+            self._abundances = np.array(abundances)
+
+        if selected_elements is not None:
+            elements = [elem for elem in self._elements if elem in selected_elements]
+            abundances = np.array([self._abundances[self._elements.index(elem)] 
+                                        for elem in self._elements])
+            self._elements = elements
+            self._abundances = abundances
+            
         
         self.info('Elements and thier abundances selected: %s',list(zip(self._elements,self._abundances)))
+
 
 
 
