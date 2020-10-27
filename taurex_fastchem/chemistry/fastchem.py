@@ -116,7 +116,7 @@ class FastChem(Chemistry):
             abundances.insert(2,abundances.pop(O_index))
             
             e_index = elements.index('e-')
-            elements.insert(-1,elements.pop(e_index))
+            elements.append(elements.pop(e_index))
             abundances.append(abundances.pop(e_index))
 
 
