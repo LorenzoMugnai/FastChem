@@ -10,6 +10,6 @@ output/
 *.d
 *.so
 
-taurex_fastchem/external/data/*
-
+taurex_fastchem/data/input/*
+dist
 /*.egg-info

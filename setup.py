@@ -1,9 +1,7 @@
 
 import setuptools
 from setuptools import find_packages
-from numpy.distutils.core import setup
-from numpy.distutils.core import Extension
-from numpy.distutils import log
+from setuptools import setup, Extension
 import re, os
 
 packages = find_packages(exclude=('tests', 'doc'))
@@ -15,11 +13,11 @@ install_requires = ['taurex', 'cython',]
 
 entry_points = {'taurex.plugins': 'fastchem = taurex_fastchem'}
 
-from distutils.extension import Extension
 from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 import glob
 import numpy as np
+import shutil
 sources = ['fastchem_src/solver_linsol_quadsol.cpp',
  'fastchem_src/solver_nelder_mead_single.cpp',
  'fastchem_src/init_solver.cpp',
@@ -48,12 +46,26 @@ clib = Extension("taurex_fastchem.external.fastchem",  # indicate where it shoul
                                ],
                       include_dirs=['fastchem_src/'],
                       extra_compile_args=["-O3", "--std=c++11", "-ffast-math", "-Wall","-pedantic","-ffast-math" ,"-march=native"],
+                      extra_link_args=["/static"],
                       language="c++"
                       )
 
-input_data = glob.glob('input/*.dat')
+files = glob.glob(os.path.join('taurex_fastchem','data','input','*.dat'))
 
-data_files = ( 'taurex_fastchem/external/data' , [*input_data, os.path.join('fastchem_src','chem_input','chemical_elements.dat') ] )
+if os.path.exists('input'):
+     try:
+          if os.path.exists(os.path.join('taurex_fastchem','data','input')):
+               os.unlink(os.path.join('taurex_fastchem','data','input'))
+          shutil.copytree('input', os.path.join('taurex_fastchem','data','input') )
+          shutil.copy(os.path.join('fastchem_src','chem_input','chemical_elements.dat'), os.path.join('taurex_fastchem','data','input') )
+     except Exception:
+          pass
+
+
+files =  ([f[len('taurex_fastchem')+1:] for f in files])
+
+data_files = [*files, os.path.join('fastchem_src','chem_input','chemical_elements.dat') ]
+
 
 ext = cythonize([clib],language_level="3")
 setup(name='taurex_fastchem',
@@ -66,6 +78,6 @@ setup(name='taurex_fastchem',
       entry_points=entry_points,
       provides=provides,
       requires=requires,
-      data_files=[data_files],
+      package_data={'taurex_fastchem': data_files},
  #     cmdclass = {"build_ext": build_ext},
       install_requires=install_requires)
