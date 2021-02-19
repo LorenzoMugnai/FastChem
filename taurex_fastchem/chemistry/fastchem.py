@@ -340,10 +340,11 @@ class FastChem(Chemistry):
 
 
     def generate_parameter_file(self):
+        import pkg_resources
         param_file = tempfile.NamedTemporaryFile('w',delete=False)
         element_filename = self.generate_element_file()
 
-        base_data_path = os.path.join(os.path.abspath(os.path.dirname(fastchem.__file__)),'data')
+        base_data_path = pkg_resources.resource_filename('taurex_fastchem',os.path.join('data','input'))
         elm_file = self._elements_datafile if self._elements_datafile is not None else os.path.join(base_data_path,'chemical_elements.dat')
         self.info('Elements data file used is in %s',elm_file)
         
