@@ -1,4 +1,4 @@
-from taurex.chemistry import Chemistry
+from taurex.chemistry import AutoChemistry
 import taurex_fastchem.external.fastchem as fastchem
 import tempfile
 import os
@@ -23,7 +23,7 @@ def element_count(mol):
     return elems_dict
 
 
-class FastChem(Chemistry):
+class FastChem(AutoChemistry):
 
     parameter_template = """#element abundance file   
 {}
@@ -150,7 +150,6 @@ class FastChem(Chemistry):
         self._electron = self.default_abundances[-1]
         self.generate_abundances(elements=ratio_elements, ratios_to_O=ratios_to_O)
         self.determine_molecules()
-        self._gases = None
         self.add_ratio_params()
     
 
@@ -186,40 +185,29 @@ class FastChem(Chemistry):
         species = [s.replace('1','') for s in fchem.speciesIter()]
 
         available = self.availableActive
+        _new_gas_list = []
 
-        _act_id = []
-        _inact_id =[]
-        _act_gas = []
-        _inact_gas = []
-        for idx,s in enumerate(species):
+        # Since FastChem orders atoms alphabetically
+        # We need to find molecules that are the same as
+        # the available active ones but ordered different atomically
+        # i.e NH3 == H3N
+
+        for s in species:
             found = False
+            gas_name = s
             elem_check = element_count(s)
             for av in available:
                 if elem_check == element_count(av):
-                    found = True
-                    _act_gas.append(av)
+                    gas_name = av
                     break
             
-            if found:
-                _act_id.append(idx)
-            else:
-                _inact_gas.append(s)
-                _inact_id.append(idx)
-        self._active_index = np.array(_act_id)
-        self._inactive_index = np.array(_inact_id)
+            _new_gas_list.append(gas_name)
+        
+        self._gases = _new_gas_list
+        self.determine_active_inactive()
 
-        self._active_gases = _act_gas
-        self._inactive_gases = _inact_gas
         os.unlink(param_file)
         os.unlink(element_file)
-
-    @property
-    def activeGases(self):
-        return self._active_gases
-
-    @property
-    def inactiveGases(self):
-        return self._inactive_gases
 
     def initialize_chemistry(self, nlayers=100, temperature_profile=None,
                              pressure_profile=None, altitude_profile=None):
@@ -255,7 +243,7 @@ class FastChem(Chemistry):
         result ,density_out, h_density_out,mean_mol_out = \
             fchem.calcDensities(temperature_profile,pressure_profile*10)
 
-        self._gases = np.array(density_out).T/density
+        self._mixprofile = np.array(density_out).T/density
 
         self.compute_mu_profile(nlayers)
 
@@ -290,40 +278,6 @@ class FastChem(Chemistry):
             default_fit = False
             self.add_fittable_param(param_name, param_tex, fget,
                                     fset, 'log', default_fit, bounds)
-
-
-
-
-    @property
-    def activeGasMixProfile(self):
-        """
-        **Requires implementation**
-
-        Should return profiles of shape ``(nactivegases,nlayers)``. Active
-        refers to gases that are actively absorbing in the atmosphere.
-        Another way to put it these are gases where molecular cross-sections
-        are used.
-
-        """
-        if self._active_index is not None and len(self._active_index) > 0:
-            return self._gases[self._active_index]
-        else:
-            return None
-
-    @property
-    def inactiveGasMixProfile(self):
-        """
-        **Requires implementation**
-
-        Should return profiles of shape ``(ninactivegases,nlayers)``.
-        These general refer to gases: ``H2``, ``He`` and ``N2``
-
-
-        """
-        if self._inactive_index is not None and len(self._inactive_index) > 0:
-            return self._gases[self._inactive_index]
-        else:
-            return None
 
 
     def generate_element_file(self):
@@ -362,6 +316,14 @@ class FastChem(Chemistry):
 
         return param_filename, element_filename
 
+
+    @property
+    def gases(self):
+        return self._gases
+    
+    @property
+    def mixProfile(self):
+        return self._mixprofile
 
     @classmethod
     def input_keywords(cls):
