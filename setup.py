@@ -46,7 +46,7 @@ clib = Extension("taurex_fastchem.external.fastchem",  # indicate where it shoul
                                ],
                       include_dirs=['fastchem_src/'],
                       extra_compile_args=["-O3", "--std=c++11", "-ffast-math", "-Wall","-pedantic","-ffast-math" ,"-march=native"],
-                      extra_link_args=["/static"],
+                      
                       language="c++"
                       )
 
