@@ -66,6 +66,7 @@ files =  ([f[len('taurex_fastchem')+1:] for f in files])
 
 data_files = [*files, os.path.join('fastchem_src','chem_input','chemical_elements.dat') ]
 
+version = "0.0.0"
 
 ext = cythonize([clib],language_level="3")
 setup(name='taurex_fastchem',
@@ -78,6 +79,7 @@ setup(name='taurex_fastchem',
       entry_points=entry_points,
       provides=provides,
       requires=requires,
+      version=version,
       package_data={'taurex_fastchem': data_files},
  #     cmdclass = {"build_ext": build_ext},
       install_requires=install_requires)
