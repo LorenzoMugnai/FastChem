@@ -73,7 +73,8 @@ class FastChem(AutoChemistry):
                  max_press_iter=100, max_nedler_iter=20000):
         super().__init__(self.__class__.__name__)
 
-
+        self._gases = None
+        self._mixprofile = None
         self._elements_datafile = elements_datafile
         self._species_datafile = species_datafile
         self._chem_accr = chem_accuracy
