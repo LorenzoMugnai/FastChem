@@ -13,3 +13,5 @@ output/
 taurex_fastchem/data/input/*
 dist
 /*.egg-info
+
+*.DS_Store
