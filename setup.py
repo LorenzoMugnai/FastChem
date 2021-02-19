@@ -66,7 +66,7 @@ files =  ([f[len('taurex_fastchem')+1:] for f in files])
 
 data_files = [*files, os.path.join('fastchem_src','chem_input','chemical_elements.dat') ]
 
-version = "0.0.0"
+version = "0.0.1-dev0"
 
 ext = cythonize([clib],language_level="3")
 setup(name='taurex_fastchem',
