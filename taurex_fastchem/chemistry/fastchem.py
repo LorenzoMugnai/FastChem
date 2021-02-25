@@ -70,7 +70,7 @@ class FastChem(AutoChemistry):
     def __init__(self,H_He_ratio=0.083,selected_elements=None, elements_abundance_file=None, ratio_elements=None,ratios_to_O=None, metallicity=1.0, base_profile='solar',
                  elements_datafile=None, species_datafile=None, chem_accuracy=1.0e-4, with_ions=False,
                  pressure_accuracy=1e-4, newton_error=1e-4, max_chem_iter=300,
-                 max_press_iter=100, max_nedler_iter=20000):
+                 max_press_iter=100, max_nedler_iter=20000, longdouble=False):
         super().__init__(self.__class__.__name__)
 
         self._gases = None
@@ -86,6 +86,7 @@ class FastChem(AutoChemistry):
         self._with_ions = with_ions
         self._metallicity = metallicity
         self._h_he_ratio = H_He_ratio
+        self._long_double = longdouble
 
         self._elements = self.default_elements
         
@@ -239,12 +240,15 @@ class FastChem(AutoChemistry):
         density = pressure_profile*10/(CONST_K*temperature_profile)
 
         param_file, element_file = self.generate_parameter_file()
-
-        fchem = fastchem.PyDoubleFastChem(param_file,0)
+        fchem = None
+        if self._long_double:
+            fchem = fastchem.PyLongDoubleFastChem(param_file, 0)
+        else:
+            fchem = fastchem.PyDoubleFastChem(param_file,0)
         result ,density_out, h_density_out,mean_mol_out = \
-            fchem.calcDensities(temperature_profile,pressure_profile*10)
+                fchem.calcDensities(temperature_profile,pressure_profile*10)
 
-        self._mixprofile = np.array(density_out).T/density
+        self._mixprofile = (np.array(density_out).T).astype(np.float)/density
 
         self.compute_mu_profile(nlayers)
 
