@@ -333,3 +333,23 @@ class FastChem(AutoChemistry):
     @classmethod
     def input_keywords(cls):
         return ['fastchem',]
+
+    BIBTEX_ENTRIES = [
+        """
+        @article{fastchem,
+            author = {Stock, Joachim W and Kitzmann, Daniel and Patzer, A Beate C and Sedlmayr, Erwin},
+            title = "{FastChem: A computer program for efficient complex chemical equilibrium calculations in the neutral/ionized gas phase with applications to stellar and planetary atmospheres }",
+            journal = {Monthly Notices of the Royal Astronomical Society},
+            volume = {479},
+            number = {1},
+            pages = {865-874},
+            year = {2018},
+            month = {06},
+            abstract = "{For the calculation of complex neutral/ionized gas-phase chemical equilibria, we present a semi-analytical, versatile, and efficient computer program, called FastChem. The applied method is based on the solution of a system of coupled non-linear (and linear) algebraic equations, namely the law of mass action and the element conservation equations including charge balance, in many variables. Specifically, the system of equations is decomposed into a set of coupled nonlinear equations in one variable each, which are solved analytically whenever feasible to reduce computation time. Notably, the electron density is determined by using the method of Nelder and Mead at low temperatures. The program is written in object-oriented C++ which makes it easy to couple the code with other programs, although a stand-alone version is provided. FastChem can be used in parallel or sequentially and is available under the GNU General Public License version 3 at https://github.com/exoclime/FastChem together with several sample applications. The code has been successfully validated against previous studies and its convergence behaviour has been tested even for extreme physical parameter ranges down to \\$100\\,\\mathrm\\{K\\}\\$ and up to \\$1000\\,\\mathrm\\{bar\\}\\$. FastChem converges stable and robust in even most demanding chemical situations, which posed sometimes extreme challenges for previous algorithms.}",
+            issn = {0035-8711},
+            doi = {10.1093/mnras/sty1531},
+            url = {https://doi.org/10.1093/mnras/sty1531},
+            eprint = {https://academic.oup.com/mnras/article-pdf/479/1/865/25126582/sty1531.pdf},
+        }
+        """
+    ]
