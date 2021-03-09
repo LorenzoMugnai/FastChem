@@ -68,18 +68,34 @@ data_files = [*files, os.path.join('fastchem_src','chem_input','chemical_element
 
 version = "0.0.2-dev0"
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+pos = long_description.find('# TauREx')
+
+long_description = long_description[pos:]
+
+
 ext = cythonize([clib],language_level="3")
 setup(name='taurex_fastchem',
       author="Ahmed Faris Al-Refaie",
       author_email="ahmed.al-refaie.12@ucl.ac.uk",
       license="BSD",
-      description='Plugin to use FastChem equilibrium chemistry ',
+      description='Python Wrapper for FastChem chemical scheme',
       packages=packages,
       ext_modules=ext,
       entry_points=entry_points,
       provides=provides,
       requires=requires,
       version=version,
+      keywords=['exoplanet',
+                'chemistry'
+                'taurex',
+                'plugin',
+                'taurex3',
+                'atmosphere',
+                'atmospheric'],
+      long_description=long_description,
       package_data={'taurex_fastchem': data_files},
  #     cmdclass = {"build_ext": build_ext},
       install_requires=install_requires)
