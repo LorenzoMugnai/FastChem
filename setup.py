@@ -96,6 +96,7 @@ setup(name='taurex_fastchem',
                 'atmosphere',
                 'atmospheric'],
       long_description=long_description,
+      long_description_content_type='text/markdown',
       package_data={'taurex_fastchem': data_files},
  #     cmdclass = {"build_ext": build_ext},
       install_requires=install_requires)
