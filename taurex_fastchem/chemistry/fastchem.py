@@ -67,7 +67,7 @@ class FastChem(AutoChemistry):
                           4.95, 3.93, 4.56, 13.1139]
     default_mass = [mass[el] for el in default_elements[:-1]]
 
-    def __init__(self,H_He_ratio=0.083,selected_elements=None, elements_abundance_file=None, ratio_elements=None,ratios_to_O=None, metallicity=1.0, base_profile='solar',
+    def __init__(self,H_He_ratio=0.083,selected_elements=None, elements_abundance_file=None, ratio_elements=None,ratios_to_O=None, metallicity=1.0,
                  elements_datafile=None, species_datafile=None, chem_accuracy=1.0e-4, with_ions=False,
                  pressure_accuracy=1e-4, newton_error=1e-4, max_chem_iter=300,
                  max_press_iter=100, max_nedler_iter=20000, longdouble=False):
