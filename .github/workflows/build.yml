@@ -13,7 +13,7 @@ env:
 
 jobs:
   build_wheels:
-    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+    if: github.event_name == 'push'
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -63,7 +63,7 @@ jobs:
   
 
   upload_pypi:
-    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+    if: github.event_name == 'push'
     needs: [build_wheels]
     runs-on: ubuntu-latest
     # upload to PyPI on every tag starting with 'v'
