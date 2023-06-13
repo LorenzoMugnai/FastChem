@@ -66,7 +66,7 @@ files =  ([f[len('taurex_fastchem')+1:] for f in files])
 
 data_files = [*files, os.path.join('fastchem_src','chem_input','chemical_elements.dat') ]
 
-version = "1.1.0-dev0"
+version = "1.1.1-dev0"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
