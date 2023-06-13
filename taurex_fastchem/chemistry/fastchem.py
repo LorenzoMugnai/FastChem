@@ -248,7 +248,7 @@ class FastChem(AutoChemistry):
         result ,density_out, h_density_out,mean_mol_out = \
                 fchem.calcDensities(temperature_profile,pressure_profile*10)
 
-        self._mixprofile = (np.array(density_out).T).astype(np.float)/density
+        self._mixprofile = (np.array(density_out).T).astype(np.float64)/density
 
         self.compute_mu_profile(nlayers)
 
