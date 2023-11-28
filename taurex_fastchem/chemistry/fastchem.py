@@ -248,7 +248,7 @@ class FastChem(AutoChemistry):
         result ,density_out, h_density_out,mean_mol_out = \
                 fchem.calcDensities(temperature_profile,pressure_profile*10)
 
-        self._mixprofile = (np.array(density_out).T).astype(np.float64)/density
+        self._mixprofile = (np.array(density_out).T).astype(float)/density
 
         self.compute_mu_profile(nlayers)
 
@@ -321,6 +321,26 @@ class FastChem(AutoChemistry):
 
         return param_filename, element_filename
 
+    def write(self, output):
+        """
+        Writes chemistry class and arguments to file
+
+        Parameters
+        ----------
+        output: :class:`~taurex.output.output.Output`
+
+        """
+        gas_entry = output.create_group('Chemistry')
+        gas_entry.write_string('chemistry_type', self.__class__.__name__)
+        gas_entry.write_string_array('active_gases', self.activeGases)
+        gas_entry.write_string_array('inactive_gases', self.inactiveGases)
+        if self.hasCondensates:
+            gas_entry.write_string_array('condensates', self.condensates)
+
+        gas_entry.write_scalar('metallicity', self._metallicity)
+        gas_entry.write_string_array('selected_elements', self._elements)
+        gas_entry.write_array('selected_elements_abundances', self._abundances)
+        return gas_entry
 
     @property
     def gases(self):
